@@ -1,4 +1,3 @@
-// Formantes de vocales (F1, F2, F3) en Hz
 const VOWELS = {
   a: [800, 1150, 2900],
   e: [400, 1600, 2700],
@@ -30,7 +29,7 @@ export class VoiceSynth {
       spread = 0
     } = opts;
 
-    const letters = word.toLowerCase().replace(/[^a-záéíóúñ]/g, "");
+    const letters = word.toLowerCase().replace(/[^a-záéíóúñɨ]/g, "");
     if (!letters) return;
 
     const syllables = this._syllabify(letters);
@@ -137,7 +136,6 @@ export class VoiceSynth {
     return buf;
   }
 
-  // Narra un párrafo como coro inquietante. Devuelve el tiempo final.
   narrateParagraph(paragraph, startTime) {
     const words = paragraph.text
       .replace(/\*\*/g, "")
@@ -171,7 +169,7 @@ export class VoiceSynth {
   start() {
     if (this.running) return;
     this.running = true;
-    this.out.gain.setTargetAtTime(0.8, this.context.currentTime, 1.0);
+    this.out.gain.setTargetAtTime(2.5, this.context.currentTime, 1.0);  // ← volumen alto
   }
 
   stop() {

@@ -1,4 +1,3 @@
-// Léxicos emocionales en español. Amplía según necesites.
 const LEX = {
   abismo:      { tension: +0.4, valence: -0.3, arousal: -0.2 },
   oscuridad:   { tension: +0.3, valence: -0.2, arousal: -0.3 },
@@ -43,6 +42,10 @@ const ENTITY_PATTERNS = [
   { key: "inkalanpat", re: /ɨnkalanpat/i }
 ];
 
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export class LoreParser {
   constructor(text) {
     this.text = text;
@@ -61,7 +64,8 @@ export class LoreParser {
     let valence = 0, arousal = 0, tension = 0, hits = 0;
 
     for (const [word, delta] of Object.entries(LEX)) {
-      const count = (lower.match(new RegExp(word, "g")) || []).length;
+      const escaped = escapeRegex(word);
+      const count = (lower.match(new RegExp(escaped, "g")) || []).length;
       if (count > 0) {
         valence += delta.valence * count;
         arousal += delta.arousal * count;
@@ -84,7 +88,6 @@ export class LoreParser {
     if (isClimax)   arousal = Math.min(1, arousal + 0.3);
     arousal = Math.min(1, arousal + exclamations * 0.1);
 
-    // Acotar a [-1, 1] / [0, 1]
     valence = Math.max(-1, Math.min(1, valence));
     arousal = Math.max(0, Math.min(1, arousal));
     tension = Math.max(0, Math.min(1, tension));

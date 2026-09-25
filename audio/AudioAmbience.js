@@ -192,7 +192,7 @@ export class AudioAmbience {
     if (this.running) return;
     this.running = true;
 
-    try { this.water.source.start(); } catch {}
+    try { this.water.source.start(); } catch (e) { console.warn("water.start falló:", e); }
 
     this._update();
   }
@@ -201,9 +201,11 @@ export class AudioAmbience {
     this.running = false;
 
     if (this.raf) {
-      cancelAnimationFrame(this.raf);
+      clearTimeout(this.raf);   // ← FIX: setTimeout, no requestAnimationFrame
       this.raf = null;
     }
+
+    if (!this.ambientBus) return;
 
     const now = this.context.currentTime;
     this.ambientBus.gain.cancelScheduledValues(now);
@@ -283,7 +285,8 @@ export class AudioAmbience {
     this.telemetry.resonance = 0.2 + combat * 0.8;
     this.telemetry.life = lifeShape;
 
-    this.raf = requestAnimationFrame(() => this._update());
+    // FIX: setTimeout en vez de requestAnimationFrame
+    this.raf = setTimeout(() => this._update(), 16);
   }
 
   debugPulse() {

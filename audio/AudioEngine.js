@@ -8,7 +8,6 @@ export class AudioEngine {
   constructor() {
     this.context = null;
     this.master = null;
-    this.limiter = null;
     this.ambienceBus = null;
     this.musicBus = null;
 
@@ -30,27 +29,17 @@ export class AudioEngine {
 
       this.context = new AudioContextClass();
 
-      // Cadena maestra
-      this.limiter = this.context.createDynamicsCompressor();
-      this.limiter.threshold.value = -10;
-      this.limiter.knee.value = 8;
-      this.limiter.ratio.value = 12;
-      this.limiter.attack.value = 0.003;
-      this.limiter.release.value = 0.15;
-
       this.master = this.context.createGain();
-      this.master.gain.value = 0.22;
-
-      this.master.connect(this.limiter);
-      this.limiter.connect(this.context.destination);
+      this.master.gain.value = 0.5;   // ← FIX: subido de 0.22
+      this.master.connect(this.context.destination);
 
       // Buses separados
       this.ambienceBus = this.context.createGain();
-      this.ambienceBus.gain.value = 0.9;
+      this.ambienceBus.gain.value = 1.0;
       this.ambienceBus.connect(this.master);
 
       this.musicBus = this.context.createGain();
-      this.musicBus.gain.value = 0.7;
+      this.musicBus.gain.value = 1.0;
       this.musicBus.connect(this.master);
 
       // Subsistemas
@@ -62,6 +51,8 @@ export class AudioEngine {
         this.master,
         this.music.reverb
       );
+
+      console.log("✅ AudioEngine: subsistemas creados");
     }
 
     if (this.context.state === "suspended") {
@@ -71,6 +62,8 @@ export class AudioEngine {
     this.ambience.start();
     this.music.start();
     this.running = true;
+
+    console.log("✅ AudioEngine: motor iniciado. Estado:", this.context.state);
   }
 
   async stop() {
@@ -108,9 +101,11 @@ export class AudioEngine {
     this.ambience.debugPulse();
   }
 
-  // Narrar el lore completo (parser + director + voice)
   narrateLore(loreText, callbacks = {}) {
-    if (!this.context) return null;
+    if (!this.context || !this.voice) {
+      console.warn("narrateLore: motor no listo");
+      return null;
+    }
 
     this.director?.stop();
     this.director = new LoreDirector(this, loreText);
@@ -152,7 +147,6 @@ export class AudioEngine {
 
     this.context = null;
     this.master = null;
-    this.limiter = null;
     this.ambienceBus = null;
     this.musicBus = null;
     this.running = false;

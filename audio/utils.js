@@ -13,7 +13,6 @@ export function midiToFreq(midi) {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
 
-// Escalas en semitonos desde la raíz
 export const SCALES = {
   minor:     [0, 2, 3, 5, 7, 8, 10],
   dorian:    [0, 2, 3, 5, 7, 9, 10],

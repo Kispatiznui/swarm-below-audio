@@ -2,8 +2,7 @@ import { AudioEngine } from "./audio/AudioEngine.js";
 import { LORE_TEXT } from "./lore/THE_SWARM_BELOW.js";
 
 const engine = new AudioEngine();
-// DEBUG: expone engine globalmente para depurar desde la consola
-window.engine = engine;
+window.engine = engine; // Para depurar desde la consola
 
 // --- Elementos de UI ---
 const startButton = document.querySelector("#startButton");
@@ -43,28 +42,38 @@ function setIntensity(value) {
 }
 
 async function start() {
-  await engine.start();
-  startButton.disabled = true;
-  stopButton.disabled = false;
-  debugButton.disabled = false;
-  narrateButton.disabled = false;
-  engineState.textContent = "running";
-  contextState.textContent = engine.context.state;
-  dot.classList.add("on");
+  try {
+    await engine.start();
+    startButton.disabled = true;
+    stopButton.disabled = false;
+    debugButton.disabled = false;
+    narrateButton.disabled = false;
+    engineState.textContent = "running";
+    contextState.textContent = engine.context.state;
+    dot.classList.add("on");
+    console.log("✅ Motor iniciado. Estado:", engine.context.state);
+  } catch (e) {
+    console.error("❌ Error al iniciar:", e);
+    engineState.textContent = "error";
+  }
 }
 
 async function stop() {
-  await engine.stop();
-  startButton.disabled = false;
-  stopButton.disabled = true;
-  debugButton.disabled = true;
-  narrateButton.disabled = true;
-  stopNarrationButton.disabled = true;
-  narrateButton.style.display = "";
-  stopNarrationButton.style.display = "none";
-  engineState.textContent = "stopped";
-  contextState.textContent = engine.context?.state ?? "closed";
-  dot.classList.remove("on");
+  try {
+    await engine.stop();
+    startButton.disabled = false;
+    stopButton.disabled = true;
+    debugButton.disabled = true;
+    narrateButton.disabled = true;
+    stopNarrationButton.disabled = true;
+    narrateButton.style.display = "";
+    stopNarrationButton.style.display = "none";
+    engineState.textContent = "stopped";
+    contextState.textContent = engine.context?.state ?? "closed";
+    dot.classList.remove("on");
+  } catch (e) {
+    console.error("❌ Error al detener:", e);
+  }
 }
 
 startButton.addEventListener("click", start);
@@ -78,14 +87,6 @@ intensity.addEventListener("input", event => {
   setIntensity(event.target.value);
 });
 
-document.querySelectorAll("[data-intensity]").forEach(button => {
-  button.addEventListener("click", () => {
-    const value = Number(button.dataset.intensity);
-    intensity.value = value;
-    setIntensity(value);
-  });
-});
-
 document.querySelectorAll("[data-mood]").forEach(button => {
   button.addEventListener("click", () => {
     const mood = MOODS[button.dataset.mood];
@@ -94,12 +95,16 @@ document.querySelectorAll("[data-mood]").forEach(button => {
 });
 
 narrateButton.addEventListener("click", async () => {
-  await engine.start();
-  engine.narrateLore(LORE_TEXT);
-  narrateButton.disabled = true;
-  narrateButton.style.display = "none";
-  stopNarrationButton.disabled = false;
-  stopNarrationButton.style.display = "";
+  try {
+    await engine.start();
+    engine.narrateLore(LORE_TEXT);
+    narrateButton.disabled = true;
+    narrateButton.style.display = "none";
+    stopNarrationButton.disabled = false;
+    stopNarrationButton.style.display = "";
+  } catch (e) {
+    console.error("❌ Error al narrar:", e);
+  }
 });
 
 stopNarrationButton.addEventListener("click", () => {
@@ -125,3 +130,5 @@ function updateReadouts() {
 
 setIntensity(0);
 updateReadouts();
+
+console.log("✅ main.js cargado. Engine listo:", engine);

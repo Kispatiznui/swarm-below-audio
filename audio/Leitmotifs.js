@@ -1,14 +1,11 @@
 import { midiToFreq } from "./utils.js";
 
-// Cada entidad tiene un motivo (secuencia de intervalos en semitonos)
-// y un timbre (tipo de oscilador + filtro).
 export const LEITMOTIFS = {
   witness: {
     name: "THE WITNESS",
-    // Descenso cromático: caída, observación, descenso
     intervals: [0, -1, -3, -5, -7],
     oscType: "sine",
-    baseMidi: 57,       // A3
+    baseMidi: 57,
     duration: 0.6,
     filterFreq: 800,
     filterQ: 3,
@@ -17,10 +14,9 @@ export const LEITMOTIFS = {
   },
   tayatna: {
     name: "TAYATNA",
-    // Motivo triste en menor: segunda menor ascendente + caída de quinta
     intervals: [0, 1, 0, -5, -7],
     oscType: "triangle",
-    baseMidi: 52,       // E3
+    baseMidi: 52,
     duration: 1.4,
     filterFreq: 500,
     filterQ: 5,
@@ -29,10 +25,9 @@ export const LEITMOTIFS = {
   },
   aberration: {
     name: "ABERRATION",
-    // Cluster disonante: múltiples semitonos
     intervals: [0, 1, 2, 6, 1, 0],
     oscType: "sawtooth",
-    baseMidi: 38,       // D2
+    baseMidi: 38,
     duration: 0.35,
     filterFreq: 600,
     filterQ: 8,
@@ -41,7 +36,6 @@ export const LEITMOTIFS = {
   },
   swarm: {
     name: "SWARM",
-    // Enjambre: pulsos rápidos ascendentes
     intervals: [0, 3, 5, 7, 10, 12],
     oscType: "square",
     baseMidi: 45,
@@ -53,10 +47,9 @@ export const LEITMOTIFS = {
   },
   below: {
     name: "THE BELOW",
-    // Profundidad: descensos de octava
     intervals: [0, -12, 0, -12, -24],
     oscType: "sine",
-    baseMidi: 33,       // A1
+    baseMidi: 33,
     duration: 2.0,
     filterFreq: 200,
     filterQ: 2,
@@ -65,7 +58,6 @@ export const LEITMOTIFS = {
   },
   inkalanpat: {
     name: "ɨNKALANPAT",
-    // Tristeza profunda: motivo suspendido
     intervals: [0, 3, 7, 3, 0, -2],
     oscType: "triangle",
     baseMidi: 48,
@@ -92,10 +84,12 @@ export class LeitmotifPlayer {
     this.reverbSend.connect(reverb);
   }
 
-  // Dispara un leitmotif completo. Devuelve tiempo de fin.
   play(entityKey, startTime = null) {
     const motif = LEITMOTIFS[entityKey];
-    if (!motif) return 0;
+    if (!motif) {
+      console.warn("Leitmotif no encontrado:", entityKey);
+      return 0;
+    }
 
     const t0 = startTime ?? this.context.currentTime;
     let t = t0;

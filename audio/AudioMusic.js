@@ -5,7 +5,7 @@ export class AudioMusic {
     this.context = context;
     this.destination = destination;
 
-    this.root = 45; // A2
+    this.root = 45;
     this.scaleName = "minor";
     this.scale = SCALES.minor;
 
@@ -156,6 +156,11 @@ export class AudioMusic {
 
     osc.start(time);
     osc.stop(time + dur + 0.05);
+
+    // FIX: limpieza de nodos
+    osc.addEventListener("ended", () => {
+      try { osc.disconnect(); g.disconnect(); } catch {}
+    }, { once: true });
   }
 
   _heartbeat(time) {
@@ -179,6 +184,11 @@ export class AudioMusic {
 
       osc.start(time + offset);
       osc.stop(time + offset + 0.3);
+
+      // FIX: limpieza
+      osc.addEventListener("ended", () => {
+        try { osc.disconnect(); g.disconnect(); } catch {}
+      }, { once: true });
     });
   }
 
@@ -226,14 +236,16 @@ export class AudioMusic {
 
     const now = this.context.currentTime;
     const beatDur = 60 / this.bpm;
+    let iterations = 0;   // FIX: límite de iteraciones
 
-    while (this.nextNoteTime < now + 0.5) {
+    while (this.nextNoteTime < now + 0.5 && iterations < 16) {
       if (this.step % 2 === 0) this._updateChord();
       this._scheduleMelodyNote(this.nextNoteTime);
       if (this.step % 4 === 0) this._heartbeat(this.nextNoteTime);
 
       this.nextNoteTime += beatDur;
       this.step++;
+      iterations++;
     }
 
     this.timer = setTimeout(() => this._tick(), 100);
