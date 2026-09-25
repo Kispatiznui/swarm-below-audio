@@ -74,7 +74,7 @@ export class VoiceSynth {
 
     const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, time);
-    env.gain.exponentialRampToValueAtTime(whisper ? 0.008 : 0.03, time + 0.03);
+    env.gain.exponentialRampToValueAtTime(whisper ? 0.02 : 0.08, time + 0.03);
     env.gain.exponentialRampToValueAtTime(0.0001, time + dur * 0.9);
     env.connect(this.out);
 
@@ -105,7 +105,7 @@ export class VoiceSynth {
       nf.frequency.value = 2000 + Math.random() * 3000;
       const ng = ctx.createGain();
       ng.gain.setValueAtTime(0.0001, time);
-      ng.gain.exponentialRampToValueAtTime(0.02, time + 0.005);
+      ng.gain.exponentialRampToValueAtTime(0.05, time + 0.005);
       ng.gain.exponentialRampToValueAtTime(0.0001, time + 0.06);
       noiseNode.connect(nf);
       nf.connect(ng);
@@ -169,7 +169,9 @@ export class VoiceSynth {
   start() {
     if (this.running) return;
     this.running = true;
-    this.out.gain.setTargetAtTime(2.5, this.context.currentTime, 1.0);  // ← volumen alto
+    const now = this.context.currentTime;
+    this.out.gain.setValueAtTime(0.8, now);
+    this.out.gain.setTargetAtTime(0.8, now, 0.12);
   }
 
   stop() {

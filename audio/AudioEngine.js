@@ -107,6 +107,7 @@ export class AudioEngine {
       return null;
     }
 
+    this.voice.start();
     this.director?.stop();
     this.director = new LoreDirector(this, loreText);
 
