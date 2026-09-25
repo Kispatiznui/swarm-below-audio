@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>THE SWARM BELOW — Audio Procedural</title>
+  <style>
+    :root {
+      --bg: #05060a;
+      --fg: #d8dce6;
+      --dim: #6a7080;
+      --accent: #8b1a1a;
+      --accent2: #2a4a5a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at center, #0a0d14 0%, #000 100%);
+      color: var(--fg);
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-weight: 300;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      font-size: 1.4rem;
+      margin: 0 0 0.5rem;
+      color: var(--fg);
+    }
+    .subtitle {
+      color: var(--dim);
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      margin-bottom: 2.5rem;
+      text-transform: uppercase;
+    }
+    .panel {
+      border: 1px solid #1a1f2a;
+      background: rgba(10, 13, 20, 0.6);
+      padding: 1.5rem 2rem;
+      border-radius: 4px;
+      min-width: 420px;
+      max-width: 520px;
+      width: 100%;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0.75rem 0;
+      font-size: 0.8rem;
+    }
+    .row label { color: var(--dim); }
+    .buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    button {
+      background: transparent;
+      border: 1px solid var(--dim);
+      color: var(--fg);
+      padding: 0.55rem 1rem;
+      font-family: inherit;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+    }
+    button:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: #fff;
+      background: rgba(139, 26, 26, 0.15);
+    }
+    button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    input[type="range"] {
+      width: 140px;
+      accent-color: var(--accent);
+    }
+    .readout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem 1.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #1a1f2a;
+      font-size: 0.7rem;
+    }
+    .readout span:first-child { color: var(--dim); }
+    .readout span:last-child { color: var(--fg); text-align: right; }
+    .status {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--dim);
+      margin-right: 0.4rem;
+      vertical-align: middle;
+    }
+    .status.on { background: #4a9a4a; box-shadow: 0 0 8px #4a9a4a; }
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .mood-grid button {
+      font-size: 0.65rem;
+      padding: 0.4rem 0.2rem;
+    }
+    .narrate-btn {
+      width: 100%;
+      margin-top: 0.75rem;
+      border-color: var(--accent);
+      color: #e8a0a0;
+    }
+    .narrate-btn:hover:not(:disabled) {
+      background: rgba(139, 26, 26, 0.3);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1>The Swarm Below</h1>
+  <div class="subtitle">Audio Procedural · Generado en tiempo real</div>
+
+  <div class="panel">
+    <div class="buttons">
+      <button id="startButton">▶ Iniciar</button>
+      <button id="stopButton" disabled>■ Detener</button>
+      <button id="debugButton" disabled>◈ Pulso</button>
+    </div>
+
+    <div class="row">
+      <label>Intensidad</label>
+      <input id="intensity" type="range" min="0" max="1" step="0.01" value="0" />
+      <span id="intensityValue">0.00</span>
+    </div>
+
+    <div class="mood-grid">
+      <button data-mood="calm">calma</button>
+      <button data-mood="mystery">misterio</button>
+      <button data-mood="tension">tensión</button>
+      <button data-mood="dread">pavor</button>
+      <button data-mood="combat">combate</button>
+      <button data-mood="hope">esperanza</button>
+    </div>
+
+    <button id="narrateButton" class="narrate-btn" disabled>
+      ▶ Narrar el Lore
+    </button>
+    <button id="stopNarrationButton" class="narrate-btn" disabled style="display:none">
+      ■ Detener narración
+    </button>
+
+    <div class="readout">
+      <span><i class="status" id="dot"></i>Contexto</span>
+      <span id="contextState">uninitialized</span>
+
+      <span>Motor</span>
+      <span id="engineState">stopped</span>
+
+      <span>Intensidad</span>
+      <span id="intensityState">0.00</span>
+
+      <span>Sub</span>
+      <span id="subReadout">0.00</span>
+
+      <span>Body</span>
+      <span id="bodyReadout">0.00</span>
+
+      <span>Water</span>
+      <span id="waterReadout">0.00</span>
+
+      <span>Resonance</span>
+      <span id="resReadout">0.00</span>
+
+      <span>Life</span>
+      <span id="lifeReadout">0.00</span>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
